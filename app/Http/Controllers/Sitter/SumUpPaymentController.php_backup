@@ -1,0 +1,289 @@
+<?php
+
+namespace App\Http\Controllers\Sitter;
+
+
+use App\Models\User;
+use App\Models\Order;
+use App\Models\Credit;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use App\Models\PurchaseCredit;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;  // Import Http class
+use GuzzleHttp\Exception\RequestException; // Api error handling
+
+class SumUpPaymentController extends Controller
+{
+    // Constant Properties
+    private $appId; // get app id from env. and save it
+    private $appSecret; // get app secret from env. and save it
+    private $grantType; // get grant type from env. and save it
+    private $merchantCountry; // get merchant country from env. and save it
+    private $merchantEmail; // get merchant email from env. and save it
+
+    // Dynamic Properties
+    private $httpClient; // http client for call api
+    private $accessToken; // initiate api and get access token
+    private $checkoutResourceId; // supply order details and create resource id
+    private $checkoutResponse; // supply card details and complete checkout
+    private $orderDetails = []; // get order details from request and save it
+    private $cardDetails = []; // get card details from request and save it
+
+
+    public function __construct(Client $guzzleClient)
+    {
+        // inject Guzzle Client and create a new instance
+        $this->httpClient = $guzzleClient;
+
+        // Get Sumup App credential
+        $this->appId = env('SUMUP_APP_ID');
+        $this->appSecret = env('SUMUP_APP_SECRET');
+        $this->grantType = env('SUMUP_GRANT_TYPE');
+        $this->merchantCountry = env('SUMUP_MERCHANT_COUNTRY');
+        $this->merchantEmail = env('SUMUP_MERCHANT_EMAIL');
+    }
+
+    // Rec ajax request and return data
+    public function processPayment(Request $request)
+    {
+        // Validate the request data
+        $this->validatePayRequest($request);
+
+        $prefix = 'CO'; // CO746453
+        $uniqueNumber = mt_rand(100000, 999999); // Generate a random 6-digit number
+        // $checkout_reference = $prefix . $uniqueNumber;
+
+        // Set request data for "createCheckoutResource"
+        $this->orderDetails = [
+            'amount' => $request->total,
+            'currency' => 'GBP',
+            'checkout_reference' => $prefix . $uniqueNumber,
+            'pay_to_email' => $this->merchantEmail,
+            // 'pay_to_email' => 'infor@petlodger.co.uk',
+            'description' => 'one-time payment',
+        ];
+
+        // Set request data for "completeCheckout"
+        $this->cardDetails = [
+            'name' => $request->card_name,
+            'number' => $request->card_number,
+            'expiry_month' => $request->expiry_month,
+            'expiry_year' => $request->expiry_year,
+            'cvv' => $request->cvv,
+        ];
+
+        // Get Access Token
+        $this->getAccessToken();
+        
+        // Get Resource ID
+        $this->createCheckoutResource();
+
+        // Get Complete Checkout
+        $this->completeCheckout();
+
+        // save order to the database
+        $this->createOrder($request);
+
+        // redirect to the next process
+        return redirect()->route('sitter.profile');
+    }
+
+    private function getAccessToken()
+    {
+        try {
+            // create HTTP client instance
+            $response = Http::post('https://api.sumup.com/token', [
+                'grant_type' => $this->grantType,
+                'client_id' => $this->appId,
+                'client_secret' => $this->appSecret,
+            ], [
+                'headers' => [
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                ],
+            ]);
+
+            // parse JSON response
+            $data = $response->json();
+
+            // store the access token for later use
+            $this->accessToken = $data['access_token'];
+            // dd($this->accessToken);
+            
+        } catch (\Exception $e) {
+            // Handle HTTP request exception
+            $this->handleRequestException($e);
+        }
+    }
+    
+    // Create Checkout Resource on Sumup 
+    private function createCheckoutResource()
+    {
+        try {
+            // make instance of Guzzle Client with SSL Path updated
+            $client = $this->createGuzzleClient();
+    
+            // create request for sumup api and store its response
+            $response = $client->post('https://api.sumup.com/v0.1/checkouts', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'checkout_reference' => $this->orderDetails['checkout_reference'],
+                    'amount' => $this->orderDetails['amount'],
+                    'currency' => $this->orderDetails['currency'],
+                    'pay_to_email' => 'info@petlodger.co.uk',
+                    'description' => $this->orderDetails['description'],
+                ],
+            ]);
+    
+            $body = $response->getBody();
+            $data = json_decode($body, true);
+    
+            // Process $apiData as needed
+            $this->checkoutResourceId  = $data['id'];
+            // dd($data);
+        } catch (RequestException $e) {
+            // Handle Guzzle request exception
+            $this->handleRequestException($e);
+        }
+    }
+    // complete checkout
+    private function completeCheckout()
+    {
+        try {
+            // make instance of Guzzle Client with SSL Path updated
+            $client = $this->createGuzzleClient();
+
+            // create request for sumup api and store its response
+            $response = $client->put("https://api.sumup.com/v0.1/checkouts/{$this->checkoutResourceId}", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'payment_type' => 'card',
+                    'card' => [
+                        'name' => $this->cardDetails['name'],
+                        // 'number' => $this->cardDetails['number'],
+                        'number' => '4929398594543223',
+                        'expiry_month' => $this->cardDetails['expiry_month'],
+                        'expiry_year' => $this->cardDetails['expiry_year'],
+                        'cvv' => $this->cardDetails['cvv'],
+                    ],
+                ],
+            ]);
+
+            $body = $response->getBody();
+            $data = json_decode($body, true);
+
+            // Process $apiData as needed
+            $this->checkoutResponse  = [
+                'id' => $data['id'],
+                'status' => $data['status'],
+                'date' => $data['date'],
+            ];
+            
+            // dd($data);
+            
+        } catch (RequestException $e) {
+   
+            // Handle Guzzle request exception
+            $this->handleRequestException($e);
+        }
+    }
+    
+      // Create Order
+    private function createOrder(Request $request)
+    {
+        // validate request
+        $this->validatePayRequest($request);
+
+        // Retrieve package details from the session
+        $packageDetails = session('package');
+
+        // Step 3: Create Order
+        $user_id = Auth::id();
+        $order = Order::create([
+            'total_amount' => $request->price,
+            'credits' => $request->credits,
+            'payment_status' => $this->checkoutResponse['status'],
+            'transaction_id' => $this->checkoutResponse['id'],
+            'package_id' => $packageDetails['package_id'],
+            'user_id' => $user_id,
+        ]);
+
+        // Step 4: Update Credit Purchase
+        $purchase_credits = PurchaseCredit::create([
+            'credit' => $order->credits,
+            'user_id' => $user_id,
+            'order_id' => $order->id,
+        ]);
+
+        // Step 5: Update Credit's Balance
+        $user = User::find($user_id);
+        // if record exist then update it, if not exist then create new record
+        if ($user && $user->credits) {
+            $user->credits->increment('balance', $purchase_credits->credit);
+        } else {
+            // create new record if the user or credits relationship is null
+            $credits = Credit::create([
+                'balance' => $order->credits,
+                'user_id' => $user_id,
+            ]);
+        }
+
+        // Forget records from session
+        $request->session()->forget(['package', 'price', 'credit', 'user_id']);
+
+        // Step 6: Redirect to Sitter Profile
+        // Redirect to the sitter's profile page with a success message
+        // return redirect()->route('sitter.profile')->with('success', 'Thank you for your purchase!');
+    }
+    
+    private function thankYou()
+    {
+
+        return view('web.sitter.thank_you');
+    }
+    
+     // Create Guzzle Client Instance with updated SSL path
+    private function createGuzzleClient()
+    {
+        return new $this->httpClient([
+
+        ]);
+    }
+    
+
+    private function handleRequestException(\Exception $e)
+    {
+        // Handle HTTP request exception
+        // You might want to log or return a specific error response
+        // $e->getCode(), $e->getMessage(), $e->getResponse() could be useful for debugging
+        // For simplicity, just rethrowing the exception here
+        $e->getMessage();
+        // dd($e);
+    }
+    
+    // Validate Request
+    private function validatePayRequest(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'subtotal' => 'required|numeric',
+            'vat' => 'required|numeric',
+            'total' => 'required|numeric',
+            // 'currency' => 'required|string|size:3',
+            'email' => 'required|email',
+            'full_name' => 'required|string',
+            'card_name' => 'required|string',
+            'card_number' => 'required|numeric',
+            'expiry_month' => 'required|numeric',
+            'expiry_year' => 'required|numeric',
+            'cvv' => 'required|numeric',
+        ]);
+    }
+}

@@ -1,0 +1,42 @@
+/* Custom CSS for Pagination and Load More Button */
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination .page-item {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.pagination .page-link {
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    padding: 5px 10px;
+    transition: background-color 0.3s;
+}
+
+.pagination .page-link:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.load-more {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.load-more-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.load-more-button:hover {
+    background-color: #0056b3;
+}

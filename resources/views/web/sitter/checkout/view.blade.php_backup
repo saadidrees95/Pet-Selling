@@ -1,0 +1,175 @@
+@extends('web.layouts.app')
+
+@section('content')
+  <!-- ================================ Header Ends ================================  -->
+      <section class="checout-1">
+         <div class="container">
+              {{-- Flash Message --}}
+                     @if (session('success'))
+                        <div class="alert alert-success">
+                           {{ session('success') }}
+                        </div>
+                        @elseif (session('error'))
+                          <div class="alert alert-danger">
+                           {{ session('error') }}
+                        </div>
+                     @endif
+             <form method="POST" action="{{route('pay')}}">
+               @method('POST')
+                  @csrf
+                  <div class="row">
+                  <div class="col-md-6">
+                     <h3>Order Summary</h3>
+                     <div class="box">
+                        <div class="row">
+                           <div class="col-md-5">
+                              <h4>{{$packageDetails['package']}}</h4>
+                              <input type="hidden" name="package" value="{{$packageDetails['package']}}">
+                              <div class="creds">
+                                 <p>{{$packageDetails['credit']}}Credits</p>
+                                 <input type="hidden" name="credits" value="{{$packageDetails['credit']}}">
+                              </div>
+                           </div>
+                           <div class="col-md-2"></div>
+                           <div class="col-md-5">
+                              <div class="price">
+                                 <p class="text-right">${{$packageDetails['price']}}</p>
+                                 <input type="hidden" name="price" value="{{$packageDetails['price']}}">
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     {{-- <div class="row">
+                        <div class="col-md-4">
+                           <p> <i> Coupon Code</i></p>
+                        </div>
+                        <div class="col-md-8">
+                           <input type="text" name="coupon_code" id="promocode" placeholder="Promo code here">
+                        </div>
+                     </div> --}}
+                     <div class="row">
+                        <div class="col-md-12">
+                           <div style="overflow-y: auto;">
+                              <table style="width: 100%;">
+                                 <thead>
+                                    <tr>
+                                       <td>Subtotal</td>
+                                       <td>$ {{$order_summary['subtotal']}} </td>
+                                        <input type="hidden" name="subtotal" value="{{$order_summary['subtotal']}}">
+                                    </tr>
+                                    <tr>
+                                       <td>+VAT 10% included</td>
+                                       <td>$ {{$order_summary['vat']}} </td>
+                                       <input type="hidden" name="vat" value="{{$order_summary['vat']}}">
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    <tr>
+                                       <td>Total</td>
+                                       <td>${{$order_summary['total']}}</td>
+                                        <input type="hidden" name="total" value="{{$order_summary['total']}}">
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </div>
+                           <button type="submit" class="pay">Place Order</button>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-6">
+                     <div class="row">
+                        <div class="col-md-6">
+                           {{-- <h3>Billing Info</h3> --}}
+                        </div>
+                        <div class="col-md-6">
+                           <img src="image/card.png" alt="">
+                        </div>
+                     </div>
+                     {{-- <form action=""> --}}
+                        <div class="row">
+                        <div class="col-md-12">
+                              <label>Email Address</label>
+                              <input type="email" name="email" value="{{$user->email ?? ''}}" placeholder="myemail@gmail.com" required>
+                           </div>
+                           <div class="col-md-12">
+                              <label>Full Name</label>
+                              <input type="text" name="full_name" value="{{$user->full_name ?? ''}}" placeholder="Jenny" required>
+                           </div>
+                           <div class="col-md-12">
+                              <label>Name on card</label>
+                              <input type="text" name="card_name" placeholder="Jenny Yey" required>
+                              <label>Card Number</label>
+                              <input type="tel" name="card_number" placeholder="1234 5678 9101 1121" required>
+                           </div>
+                           <div class="col-md-3">
+                              <label>Exp. Month</label>
+                              <input type="tel" name="expiry_month" placeholder="MM" required>
+                           </div>
+                            <div class="col-md-3">
+                              <label>Year</label>
+                              <input type="tel" name="expiry_year" placeholder="YY" required>
+                           </div>
+                           {{-- <div class="col-md-3">
+                              <label>Exp. Month</label>
+                              <select name="expiry_month" id="expiry_month">
+                                 <option value="0">Jan</option>
+                                 <option value="1">Feb</option>
+                                 <option value="2">Mar</option>
+                                 <option value="3">Apr</option>
+                                 <option value="4">May</option>
+                                 <option value="5">Jun</option>
+                                 <option value="6">Jul</option>
+                                 <option value="7">Aug</option>
+                                 <option value="8">Sep</option>
+                                 <option value="9">Oct</option>
+                                 <option value="10">Nov</option>
+                                 <option value="11">Dec</option>
+                           </select>
+                           </div>
+                           <div class="col-md-3">
+                              <label>Year</label>
+                              <select name="expiry_year" id="expiry_year">
+                                 <option value="0">24</option>
+                                 <option value="1">25</option>
+                                 <option value="2">26</option>
+                                 <option value="3">27</option>
+                                 <option value="4">28</option>
+                                 <option value="5">29</option>
+                                 <option value="6">30</option>
+                                 <option value="7">31</option>
+                                 <option value="8">32</option>
+                                 <option value="9">33</option>
+                                 <option value="10">34</option>
+                                 <option value="11">35</option>
+                           </select>
+                           </div> --}}
+                           <div class="col-md-6">
+                              <label>CVV</label>
+                              <input type="tel" name="cvv" placeholder="123" required>
+                           </div>
+                           {{-- <div id="sumup-card"></div>
+                              <script
+                              type="text/javascript"
+                              src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"
+                              ></script>
+                              <script type="text/javascript">
+                              SumUpCard.mount({
+                                 id: 'sumup-card',
+                                 checkoutId: '2ceffb63-cbbe-4227-87cf-0409dd191a98',
+                                 onResponse: function (type, body) {
+                                    console.log('Type', type);
+                                    console.log('Body', body);
+                                 },
+                              });
+                              </script>
+                        </div> --}}
+                     {{-- </form> --}}
+                  </div>
+            </div>
+             </form>
+         </div>
+      </section>
+   <!-- ================================ Footer Starts ================================  -->
+
+  
+@endsection

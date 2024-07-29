@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
+
+
+class VerificationController extends Controller
+{
+    public function showOtpFormEmail()
+    {
+        //generate OTP and send it to the user's email
+        $otp = mt_rand(1000, 9999);
+        $name = Session::get('full_name');
+        $email = Session::get('email');
+
+
+        $data = [
+            'otp' => $otp,
+            'name' => $name,
+            'message' => 'Hello ' . $name . '! Thank you for registering on our Pet Care platform.Your OTP (One-Time Password) for email verification is: ' . $otp . 'If you did not create an account, no further action is required.',
+        ];
+
+        // dd($name, $email);
+
+        $info = [
+            'to_email' => $email,
+            'to_name' => $name,
+            'from_email' => 'support@petlodger.co.uk',
+            'from_name' => 'Petlodger',
+        ];
+
+        Mail::send('emails/otp_verify', $data, function ($message) use ($info) {
+            $message->to($info['to_email'], $info['to_name']);
+            $message->from($info['from_email'], $info['from_name']);
+            $message->subject('Petlodger - OTP Verification');
+        });
+
+        // Step 7: Store the OTP in the user's record (update in your database)
+        // Auth::user()->update(['otp' => $otp]);
+        // $user = Auth::user();
+        // $user->otp = $otp;
+        // $user->save();
+
+        // Store the OTP and user's email in session for verification
+        Session::put('otp', $otp);
+        Session::put('otp_email', $email);
+
+        // load otp confirmation form
+        return view('auth.register.verify')->with('success', 'OTP sent to your email for verification!');
+    }
+    public function confirmCodeEmail(Request $request)
+    {
+        // return $request;
+        // validate request
+        $otp = $request;
+        // $otp = $request->validate([
+        //     'code1' => 'required|numeric|min:1|max:1', // Update the validation rule to 'numeric'
+        //     'code2' => 'required|numeric|min:1|max:1', // Update the validation rule to 'numeric'
+        //     'code3' => 'required|numeric|min:1|max:1', // Update the validation rule to 'numeric'
+        //     'code4' => 'required|numeric|min:1|max:1', // Update the validation rule to 'numeric'
+        // ]);
+        // Combine digits into a single string
+        $otpCode = $otp['code1'] . $otp['code2'] . $otp['code3'] . $otp['code4'];
+
+        // get data from session
+        $otp = Session::get('otp');
+        $email = Session::get('otp_email');
+        
+        // dd($otp, $email);
+        // if otp verified and email not empty
+        if ($otp == $otpCode && !empty($email)) {
+
+            // Mark the OTP as verified and log in the user
+            $user = User::where('email', $email)->update(['email_verified_at' => now()]);
+       
+  
+            $user = User::where('email', $email)->first();
+            auth()->login($user);
+            // Session::forget(['otp', 'otp_email']);
+
+            // Redirect to a specific page after successful registration
+            return redirect('profile')->with('success', 'Registration Successful! Welcome to our site.');
+            
+        } else {
+            
+            return redirect()->back()->with(['message' => 'Invalid OTP. Please try again.', 'class' => 'danger']);
+        }
+       
+    }
+    public function resendCode()
+    {
+        return redirect()->route('email-otp-confirmation.form');
+
+    }
+    public function showOtpFormMobile()
+    {
+        return view('auth.register.verify_mobile');
+    }
+    public function confirmCodeMobile(Request $request)
+    {
+        return $request;
+
+    }
+}

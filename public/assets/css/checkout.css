@@ -1,0 +1,105 @@
+ .checout-1 {
+    padding: 80px 0;
+}
+
+.checout-1 h3 {
+    color: var(--neutral-color-100, #00171F);
+    font-family: Lato;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px; /* 55.556% */
+    margin: 25px auto;
+}
+
+.checout-1  .box {
+    border-radius: 15px;
+    background: #E8E8E8;
+    padding: 15px;
+    margin: 25px auto;
+}
+
+.checout-1 .box h4 {
+    color: var(--neutral-color-100, #00171F);
+    font-family: Lato;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px; /* 100% */
+}
+
+.checout-1 .box .row {display: flex;flex-wrap: wrap;align-items: center;}
+
+.checout-1 .box  p {
+    color: var(--neutral-color-100, #00171F);
+    font-family: Lato;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px; /* 100% */
+}
+.checout-1 p i {
+    color: #252525;
+    font-family: Lato;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    text-transform: capitalize;
+}
+.checout-1 input {
+    border-radius: 7px;
+    background: #E8E8E8;
+    width: 100%;
+    border: none;
+    padding: 10px;
+    outline: none !important;
+}
+
+.checout-1 .row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.checout-1 input#promocode::placeholder {
+    color: var(--neutral-600, #6F6C90);
+    font-family: Lato;
+    font-size: 16px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.checout-1 td {color: var(--neutral-color-100, #00171F);font-family: Lato;font-size: 20px;font-style: normal;font-weight: 700;line-height: 20px; /* 100% */padding: 25px 0;}
+
+.checout-1 tbody td {
+    color: var(--neutral-color-100, #00171F);
+    font-family: Lato;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px; /* 80% */
+    letter-spacing: 1.25px;
+}
+
+.checout-1 button.pay {
+    color: var(--color-brand-white, #FFF);
+    font-family: Inter;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    border-radius: 0px 20px;
+    background: #62C5D3;
+    border: none;
+    width: 100%;
+    padding: 15px;
+    text-transform: capitalize;
+    margin: 10px auto;
+}
+.checout-1 tbody {
+    border-top: 2px solid #000;
+}
+.checout-1 td:nth-last-child(1) {
+    text-align: right;
+}

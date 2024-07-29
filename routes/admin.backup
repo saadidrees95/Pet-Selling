@@ -1,0 +1,77 @@
+<?php
+
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminServiceController;
+use App\Http\Controllers\Admin\AdminPackageController;
+use App\Http\Controllers\Admin\AdminPetOwnerController;
+use App\Http\Controllers\Admin\AdminPetsController;
+use App\Http\Controllers\Admin\AdminAdsController;
+use App\Http\Controllers\Admin\AdminSitterController;
+use App\Http\Controllers\Admin\AdminCouponController;
+use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\AdminCreditsController;
+use App\Http\Controllers\Admin\AdminSubscriberController;
+use App\Http\Controllers\Admin\AdminLeadsController;
+use App\Http\Controllers\Admin\AdminUserController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    // Services
+    Route::resource('/admin/services', AdminServiceController::class);
+
+    // Packages
+    Route::resource('/admin/packages', AdminPackageController::class);
+
+    // Pet Owners
+    Route::resource('/admin/pet-owners', AdminPetOwnerController::class);
+
+    // Pets
+    Route::resource('/admin/pets', AdminPetsController::class);
+
+    // Ads
+    Route::resource('/admin/ads', AdminAdsController::class);
+
+    // Sitters
+    Route::resource('/admin/sitters', AdminSitterController::class);
+
+    // Coupons
+    Route::resource('/admin/coupons', AdminCouponController::class);
+
+    // Orders
+    Route::resource('/admin/orders', AdminOrderController::class);
+
+    // Credits
+    Route::resource('/admin/credits', AdminCreditsController::class);
+
+    // Leads
+    Route::resource('/admin/leads', AdminLeadsController::class);
+
+    // Users
+    Route::resource('/admin/users', AdminUserController::class);
+    
+    // Subscribers
+    Route::resource('/admin/subscribers', AdminSubscriberController::class);
+
+    // Dashboard
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+    // Settings (Example route, adjust according to your needs)
+    Route::get('/admin/settings', [AdminSettingsController::class, 'index'])->name('admin.settings.index');
+
+    // Permissions (Example route, adjust according to your needs)
+    Route::get('/admin/permissions', [AdminPermissionsController::class, 'index'])->name('admin.permissions.index');
+
+});

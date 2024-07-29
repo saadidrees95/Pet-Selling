@@ -1,0 +1,126 @@
+/* form input[type="submit"] {
+  margin-left: auto;
+  display: block;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+  width: 100% !important;
+  background: #61c4d2 !important;
+} */
+
+/* styles.css */
+
+/* Style for pagination links */
+/* styles.css */
+
+Pagination container
+nav[role="navigation"] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+/* Pagination buttons */
+nav[role="navigation"] a {
+    background: ;
+    display: inline-block;
+    color: #007bff;
+    padding: 5px 10px;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+    margin: 0 0px;
+    transition: background-color 0.3s;
+}
+
+/* Active pagination button */
+nav[role="navigation"] a[aria-current="page"] {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+/* Hover effect for pagination buttons */
+nav[role="navigation"] a:hover {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+/* Pagination information text */
+nav[role="navigation"] .pagination-info {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Pagination container for small screens */
+nav[role="navigation"] .pagination-small-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Pagination buttons for small screens */
+nav[role="navigation"] .pagination-small-screen a {
+    margin: 4px 0;
+}
+
+
+/* customize */
+svg {
+  overflow: hidden;
+  vertical-align: middle;
+  width:20px;
+}
+
+div.pagination nav.flex.items-center.justify-between div.flex.justify-between.flex-1{
+display: none;
+}
+div.pagination nav{
+  margin:auto;
+  margin-top: 5px;
+}
+
+
+.pagination {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: inline;
+  padding-left: 0;
+  list-style: none;
+  border-radius: 0.42rem;
+}
+
+/* admin sidebar css
+@media (min-width: 992px) {
+  .brand {
+    background-color: #62C5D3;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    color:#FFF;
+  }
+} */
+
+
+/* 
+.aside {
+  background-color: #62C5D3;
+    color:#FFF;
+
+}
+
+.aside-menu {
+  background-color: #62C5D3;
+    color:#FFF;
+
+}
+
+.aside-menu .menu-nav > .menu-item.menu-item-active > .menu-heading, .aside-menu .menu-nav > .menu-item.menu-item-active > .menu-link {
+  background-color: #62C5D3;
+    color:#FFF;
+
+} */
+
+
+/* #225768 */
